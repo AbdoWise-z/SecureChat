@@ -58,10 +58,19 @@ target_link_libraries(
 add_executable(
         test
         test.cpp
+        util/BigInt.cpp
+        sec/ElGamalSignature.cpp
+        sec/sha1.cpp
+        sec/sha1.hpp
+        sec/SHA256.cpp
+        sec/SHA256.h
+        sec/aes256.cpp
+        sec/aes256.hpp
         util/BinaryInt.cpp
         util/BinaryInt.h
 )
 
 target_link_libraries(
-        test -lgmp
+        test
+        -lgmp
 )

@@ -112,6 +112,7 @@ static bool init_client() {
     addr.sin_port = htons(PORT);
     if (connect(connectionSocket, (struct sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
         cout << "Failed to connect socket : " << WSAGetLastError() << endl;
+        UI::error("Failed");
         return false;
     }
 
@@ -139,8 +140,7 @@ static bool init() {
 
     if (mIsServer) {
         if (!init_server()) return false;
-    }
-    else {
+    } else {
         if (!init_client()) return false;
     }
     return true;
@@ -311,9 +311,18 @@ static void connection_loop(){
 
         std::cout << "RECV_SIZE: " << size << std::endl;
 
+        std::stringstream ss;
+        ss << "Encrypted : \t";
         for (int i = 0;i < size;i++){
+            ss << std::hex << std::setfill('0') << std::setw(2) << static_cast<int>( rBuff[i] & 0xff ) << " ";
+            if (i % 10 == 0 && i != 0){
+                ss << std::endl;
+                ss << "\t\t\t\t";
+            }
             cypher.push_back(rBuff[i]);
         }
+
+        UI::info(ss.str().c_str());
 
         Aes256::decrypt(key , cypher , plain);
 
@@ -351,6 +360,11 @@ static void connection_launcher(){
 
 void Chat::startConnection(bool server) {
     if (state == 0){
+        mTerminate = true;
+        if (mThread.joinable()){
+            mThread.join();
+        }
+
         mIsServer = server;
         mTerminate = false;
         std::cout << "Starting Connection Sequence" << std::endl;
@@ -363,12 +377,10 @@ void Chat::disconnect() {
     mTerminate = true;
     if (serverSocket != INVALID_SOCKET) {
         closesocket(serverSocket);
-        serverSocket = INVALID_SOCKET;
     }
 
     if (connectionSocket != INVALID_SOCKET) {
         closesocket(connectionSocket);
-        connectionSocket = INVALID_SOCKET;
     }
 }
 
