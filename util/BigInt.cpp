@@ -27,10 +27,6 @@
     SOFTWARE.
 */
 
-
-
-#pragma once
-
 #include "BigInt.h"
 
 #define big_abs BigInt::_big_abs
